@@ -57,3 +57,37 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+
+# 18/06/2026
+
+* Creación de proyecto Node 26
+    
+      nvm install 26
+      nvm use 26.3.1
+
+* Angular 22
+
+      npm create @angular@22 identity-app --routing --style=scss
+      (No SSR por el momento).
+
+* Capcitor 8
+
+      npm install @capacitor/core@8
+      npm install -D @capacitor/cli@8
+
+      npx cap init
+
+      npm install @capacitor/android@8 @capacitor/ios@8
+      npx cap add android
+
+      npm run build
+      npx cap sync
+
+      npx cap open android
+
+      npx cap run android
+
+
+
+
