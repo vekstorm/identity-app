@@ -91,3 +91,20 @@ For more information on using the Angular CLI, including detailed command refere
 
 
 
+
+## Instalar bootstrap sin cdn
+
+    npm install bootstrap
+    npm install @popperjs/core
+    npm install --save-dev @types/bootstrap
+
+    En el angular.json:
+
+    "styles": [
+      "node_modules/bootstrap/dist/css/bootstrap.min.css",
+      "src/styles.css"
+    ]
+
+    "scripts": [
+      "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+    ]
