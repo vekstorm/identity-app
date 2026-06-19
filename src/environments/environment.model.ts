@@ -11,4 +11,5 @@ export interface AppEnvironment {
   codeChallengeMethod?: string;
   codeChallenge?: string;
   codeVerifier?: string;
+  tokenUri?: string;
 }
