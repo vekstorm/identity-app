@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { APP_CONFIG } from '../../core/app-config.token';
 import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '../../core/pkce';
 
 @Component({
@@ -10,23 +10,25 @@ import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '
   styleUrl: './menu.scss',
 })
 export class Menu {
+  private config = inject(APP_CONFIG);
+
   async login(): Promise<void> {
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     storeCodeVerifier(codeVerifier);
 
     const params = new URLSearchParams({
-      response_type: environment.responseType!,
-      client_id: environment.clientId!,
-      redirect_uri: environment.redirectUri!,
-      scope: environment.scope!,
-      code_challenge_method: environment.codeChallengeMethod!,
+      response_type: this.config.responseType!,
+      client_id: this.config.clientId!,
+      redirect_uri: this.config.redirectUri!,
+      scope: this.config.scope!,
+      code_challenge_method: this.config.codeChallengeMethod!,
       code_challenge: codeChallenge,
     });
-    window.location.href = `${environment.authorizeUri}${params.toString()}`;
+    window.location.href = `${this.config.authorizeUri}${params.toString()}`;
   }
 
   logout(): void {
-    window.location.href = environment.apiUrl + "/login?logout";
+    window.location.href = this.config.apiUrl + "/login?logout";
   }
 }

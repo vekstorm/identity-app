@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { environment } from '../../../environments/environment';
+import { APP_CONFIG } from '../../core/app-config.token';
 import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '../../core/pkce';
 
 @Component({
@@ -10,12 +10,14 @@ import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '
   styleUrl: './home.scss',
 })
 export class Home {
-  authorizeUri = environment.authorizeUri?.replace('?', '');
-  redirectUri = environment.redirectUri;
-  clientId = environment.clientId;
-  scope = environment.scope;
-  responseType = environment.responseType;
-  codeChallengeMethod = environment.codeChallengeMethod;
+  private config = inject(APP_CONFIG);
+
+  authorizeUri = this.config.authorizeUri?.replace('?', '');
+  redirectUri = this.config.redirectUri;
+  clientId = this.config.clientId;
+  scope = this.config.scope;
+  responseType = this.config.responseType;
+  codeChallengeMethod = this.config.codeChallengeMethod;
 
   async login(): Promise<void> {
     const codeVerifier = generateCodeVerifier();
@@ -23,13 +25,13 @@ export class Home {
     storeCodeVerifier(codeVerifier);
 
     const params = new URLSearchParams({
-      response_type: environment.responseType!,
-      client_id: environment.clientId!,
-      redirect_uri: environment.redirectUri!,
-      scope: environment.scope!,
-      code_challenge_method: environment.codeChallengeMethod!,
+      response_type: this.config.responseType!,
+      client_id: this.config.clientId!,
+      redirect_uri: this.config.redirectUri!,
+      scope: this.config.scope!,
+      code_challenge_method: this.config.codeChallengeMethod!,
       code_challenge: codeChallenge,
     });
-    window.location.href = `${environment.authorizeUri}${params.toString()}`;
+    window.location.href = `${this.config.authorizeUri}${params.toString()}`;
   }
 }
