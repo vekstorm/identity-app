@@ -1,12 +1,17 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { APP_CONFIG } from '../core/app-config.token';
+import { getStoredCodeVerifier, clearCodeVerifier } from '../core/pkce';
+import { ApiService } from './api.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
   private config = inject(APP_CONFIG);
+  private api = inject(ApiService);
+  private router = inject(Router);
 
-  private _isAuthenticated = signal<boolean>(false);
+  private _isAuthenticated = signal<boolean>(this.hasValidToken());
   private _hasAuthority = signal<boolean>(false);
 
   isAuthenticated() {
@@ -46,11 +51,21 @@ export class AuthService {
     return localStorage.getItem("REFRESH_TOKEN");
   }
 
+  private hasValidToken(): boolean {
+    const token = this.getAccessToken();
+    if (!token) return false;
+    const parsed = this.parseJwt(token);
+    if (!parsed) return false;
+    const exp = parsed['exp'] as number | undefined;
+    if (!exp || Date.now() < exp * 1000) return true;
+    return this.getRefreshToken() !== null;
+  }
+
   setAuthentication(isAuthenticated: boolean) {
     this._isAuthenticated.update(() => isAuthenticated);
   }
 
-  markAsAutenticathed(token: string | null) {
+  setAuthenticated(token: string | null) {
     if (!token) return;
 
     const jwt = JSON.parse(token) as { access_token: string; refresh_token: string };
@@ -75,7 +90,50 @@ export class AuthService {
         method: 'GET',
         credentials: 'include',
         mode: 'cors',
-      }).catch(() => {});
+      }).catch(() => { });
+    }
+  }
+
+  async handleOAuthCallback(code: string): Promise<void> {
+    const codeVerifier = getStoredCodeVerifier();
+    if (!codeVerifier) {
+      this.router.navigate(['/'], { replaceUrl: true, queryParams: {} });
+      return;
+    }
+
+    try {
+      const authenticationData = await this.api.exchangeToken(code, codeVerifier);
+      this.setAuthentication(false);
+
+      if (authenticationData['access_token']) {
+        const parsed = this.parseJwt(authenticationData['access_token'] as string);
+        if (parsed) {
+          const claims = this.parseClaims(parsed);
+          if (claims.roles && !claims.roles.includes('ROLE_ADMIN')) {
+            clearCodeVerifier();
+            this.clearSession();
+            return;
+          }
+          this.setAuthenticated(JSON.stringify(authenticationData));
+        }
+      }
+    } catch {
+      localStorage.clear();
+      sessionStorage.clear();
+    } finally {
+      clearCodeVerifier();
+      this.router.navigate(['/'], { replaceUrl: true, queryParams: {} });
+    }
+  }
+
+  private clearSession(): void {
+    localStorage.clear();
+    sessionStorage.clear();
+    const authBaseUrl = this.config.authorizeUri?.replace(/\/oauth2\/authorize.*$/, '');
+    if (authBaseUrl) {
+      window.location.href = `${authBaseUrl}/exit`;
+    } else {
+      window.location.href = '/';
     }
   }
 

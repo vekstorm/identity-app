@@ -1,5 +1,4 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { APP_CONFIG } from '../../core/app-config.token';
 import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '../../core/pkce';
 import { Users } from '../users/users';
@@ -9,7 +8,7 @@ import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, Users, Roles, Permissions],
+  imports: [Users, Roles, Permissions],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
