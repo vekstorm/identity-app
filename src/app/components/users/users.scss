@@ -215,6 +215,24 @@
   &.danger:not(:hover) svg {
     stroke: #ff4444;
   }
+
+  &.edit:hover {
+    border-color: #4a9eff;
+    color: #4a9eff;
+  }
+
+  &.edit:not(:hover) svg {
+    stroke: #4a9eff;
+  }
+
+  &.toggle:hover {
+    border-color: #ffaa33;
+    color: #ffaa33;
+  }
+
+  &.toggle:not(:hover) svg {
+    stroke: #ffaa33;
+  }
 }
 
 .loading-cell {

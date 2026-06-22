@@ -1,10 +1,9 @@
-import { Component, input, output, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, input, output, signal, effect, inject } from '@angular/core';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-role-form-modal',
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './role-form-modal.html',
   styleUrl: './role-form-modal.scss',
 })
@@ -14,8 +13,13 @@ export class RoleFormModal {
   close = output<void>();
   save = output<any>();
 
-  name = signal('');
-  description = signal('');
+  private fb = inject(FormBuilder);
+
+  form = this.fb.group({
+    name: ['', Validators.required],
+    description: [''],
+  });
+
   selectedPermissions = signal<string[]>([]);
   dropdownOpen = signal(false);
   permSearch = signal('');
@@ -24,12 +28,13 @@ export class RoleFormModal {
     effect(() => {
       const r = this.role();
       if (r) {
-        this.name.set(r.name || '');
-        this.description.set(r.description || '');
+        this.form.patchValue({
+          name: r.name || '',
+          description: r.description || '',
+        });
         this.selectedPermissions.set(r.permissions || []);
       } else {
-        this.name.set('');
-        this.description.set('');
+        this.form.reset();
         this.selectedPermissions.set([]);
       }
     });
@@ -54,9 +59,14 @@ export class RoleFormModal {
   }
 
   onSave(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const v = this.form.value;
     this.save.emit({
-      name: this.name(),
-      description: this.description(),
+      name: v.name,
+      description: v.description || undefined,
       permissions: this.selectedPermissions(),
     });
   }

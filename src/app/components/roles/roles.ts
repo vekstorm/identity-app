@@ -47,7 +47,7 @@ export class Roles implements OnInit {
   loadPermissions(): void {
     this.api.getAllPermissions().then(
       (res: any) => this.allPermissions.set(res.content || res),
-      () => {}
+      () => { }
     );
   }
 
@@ -98,7 +98,7 @@ export class Roles implements OnInit {
     if (!confirm(`Delete role "${role.name}"?`)) return;
     this.api.deleteRole(role.id).then(
       () => this.loadRoles(),
-      (err: any) => console.error('Error deleting role', err)
+      (err: any) => alert('Error deleting role. Role is possibly assigned to any user/s.')
     );
   }
 }

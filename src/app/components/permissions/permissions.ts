@@ -84,7 +84,7 @@ export class Permissions implements OnInit {
     if (!confirm(`Delete ${ids.length} permission(s)?`)) return;
     this.api.deletePermissions(ids).then(
       () => this.loadPermissions(),
-      (err: any) => console.error('Error batch deleting permissions', err)
+      (err: any) => alert('Error deleting permissions. Any selected permission is associated to an existing role?')
     );
   }
 
@@ -121,7 +121,7 @@ export class Permissions implements OnInit {
     if (!confirm(`Delete permission "${perm.name}"?`)) return;
     this.api.deletePermission(perm.id).then(
       () => this.loadPermissions(),
-      (err: any) => console.error('Error deleting permission', err)
+      (err: any) => alert('Error deleting permissions. Selected permission is associated to an existing role?')
     );
   }
 }

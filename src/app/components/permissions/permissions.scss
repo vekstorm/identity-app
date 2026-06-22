@@ -201,6 +201,15 @@
   &.danger svg {
     stroke: #ff4444;
   }
+
+  &.edit:hover {
+    border-color: #4a9eff;
+    color: #4a9eff;
+  }
+
+  &.edit svg {
+    stroke: #4a9eff;
+  }
 }
 
 .loading-cell {

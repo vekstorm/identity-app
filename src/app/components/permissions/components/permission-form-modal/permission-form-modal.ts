@@ -1,10 +1,9 @@
-import { Component, input, output, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component, input, output, effect, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-permission-form-modal',
-  imports: [CommonModule, FormsModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './permission-form-modal.html',
   styleUrl: './permission-form-modal.scss',
 })
@@ -13,26 +12,35 @@ export class PermissionFormModal {
   close = output<void>();
   save = output<any>();
 
-  name = signal('');
-  description = signal('');
+  private fb = inject(FormBuilder);
+
+  form = this.fb.group({
+    name: ['', Validators.required],
+    description: [''],
+  });
 
   constructor() {
     effect(() => {
       const p = this.permission();
       if (p) {
-        this.name.set(p.name || '');
-        this.description.set(p.description || '');
+        this.form.patchValue({
+          name: p.name || '',
+          description: p.description || '',
+        });
       } else {
-        this.name.set('');
-        this.description.set('');
+        this.form.reset();
       }
     });
   }
 
   onSave(): void {
-    this.save.emit({
-      name: this.name(),
-      description: this.description(),
-    });
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const v = this.form.value;
+    const payload: any = { name: v.name };
+    if (v.description) payload.description = v.description;
+    this.save.emit(payload);
   }
 }
