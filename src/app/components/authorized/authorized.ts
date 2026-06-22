@@ -5,6 +5,7 @@ import { APP_CONFIG } from '../../core/app-config.token';
 import { getStoredCodeVerifier, clearCodeVerifier } from '../../core/pkce';
 import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '../../core/pkce';
 import { ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-authorized',
@@ -16,6 +17,7 @@ import { ApiService } from '../../services/api.service';
 export class Authorized implements OnInit {
   private api = inject(ApiService);
   private config = inject(APP_CONFIG);
+  private authService = inject(AuthService)
 
   authCode = signal<string | null>(null);
   tokenResponse = signal<string | null>(null);
@@ -31,57 +33,6 @@ export class Authorized implements OnInit {
   scope = signal<string[]>([]);
   userId = signal<string | null>(null);
   roles = signal<string[]>([]);
-
-  private parseJwt(token: string): Record<string, unknown> | null {
-    try {
-      return JSON.parse(atob(token.split('.')[1]));
-    } catch {
-      return null;
-    }
-  }
-
-  private extractClaims(claims: Record<string, unknown>): void {
-    this.claims.set(claims);
-
-    // user_id (prefer user_id field, fallback to sub)
-    this.userId.set((claims as any).user_id ?? (claims as any).sub ?? null);
-
-    // scope (array or space-separated string)
-    const rawScope = (claims as any).scope;
-    if (Array.isArray(rawScope)) {
-      this.scope.set(rawScope.map(String));
-    } else if (typeof rawScope === 'string') {
-      this.scope.set(rawScope.split(/[\s,]+/).filter(Boolean));
-    } else {
-      this.scope.set([]);
-    }
-
-    // authorities
-    const rawAuthorities = (claims as any).authorities;
-    if (Array.isArray(rawAuthorities)) {
-      this.authorities.set(rawAuthorities.map(String));
-    }
-
-    // roles (from realm_access.roles or top-level roles)
-    const realmAccess = (claims as any).realm_access;
-    if (realmAccess?.roles) {
-      this.roles.set(realmAccess.roles);
-    } else if (Array.isArray((claims as any).roles)) {
-      this.roles.set((claims as any).roles.map(String));
-    }
-
-    // permissions (from resource_access or top-level permissions)
-    const resourceAccess = (claims as any).resource_access;
-    if (resourceAccess) {
-      const perms: string[] = [];
-      for (const client of Object.values(resourceAccess) as any) {
-        if (client.roles) perms.push(...client.roles);
-      }
-      this.permissions.set([...new Set(perms)]);
-    } else if (Array.isArray((claims as any).permissions)) {
-      this.permissions.set((claims as any).permissions.map(String));
-    }
-  }
 
   ngOnInit(): void {
     const params = new URLSearchParams(window.location.search);
@@ -107,13 +58,15 @@ export class Authorized implements OnInit {
       const data = await this.api.exchangeToken(code, codeVerifier);
       this.tokenResponse.set(JSON.stringify(data, null, 2));
 
+      this.authService.setAuthentication(false);
+
       if (data['id_token']) {
-        const parsed = this.parseJwt(data['id_token'] as string);
+        const parsed = this.authService.parseJwt(data['id_token'] as string);
         this.idTokenClaims.set(parsed ? JSON.stringify(parsed, null, 2) : 'Failed to decode id_token');
       }
 
       if (data['access_token']) {
-        const parsed = this.parseJwt(data['access_token'] as string);
+        const parsed = this.authService.parseJwt(data['access_token'] as string);
         this.accessTokenClaims.set(parsed ? JSON.stringify(parsed, null, 2) : 'Failed to decode access_token');
         if (parsed) {
           this.extractClaims(parsed);
@@ -122,9 +75,10 @@ export class Authorized implements OnInit {
             this.clearSession();
             return;
           }
+          this.authService.markAsAutenticathed(JSON.stringify(data));
         }
       } else if (data['id_token']) {
-        const parsed = this.parseJwt(data['id_token'] as string);
+        const parsed = this.authService.parseJwt(data['id_token'] as string);
         if (parsed) {
           this.extractClaims(parsed);
           if (!this.roles().includes('ROLE_ADMIN')) {
@@ -149,14 +103,12 @@ export class Authorized implements OnInit {
   private clearSession(): void {
     sessionStorage.clear();
 
-    // // Redirect to auth server logout to clear session cookie
-    // const authBaseUrl = this.config.authorizeUri?.replace(/\/oauth2\/authorize.*$/, '');
-    // if (authBaseUrl) {
-    //   window.location.href = `${authBaseUrl}/login?logout`;
-    // } else {
-    //   window.location.href = '/';
-    // }
-    window.location.href = '/';
+    const authBaseUrl = this.config.authorizeUri?.replace(/\/oauth2\/authorize.*$/, '');
+    if (authBaseUrl) {
+      window.location.href = `${authBaseUrl}/exit`;
+    } else {
+      window.location.href = '/';
+    }
   }
 
   async login(): Promise<void> {
@@ -173,5 +125,19 @@ export class Authorized implements OnInit {
       code_challenge: codeChallenge,
     });
     window.location.href = `${this.config.authorizeUri}${params.toString()}`;
+  }
+
+  private extractClaims(claims: Record<string, unknown>): void {
+    const parsed = this.authService.parseClaims(claims);
+    this.applyClaims(claims, parsed);
+  }
+
+  private applyClaims(claims: Record<string, unknown>, parsed: any): void {
+    this.claims.set(claims);
+    this.userId.set(parsed.userId);
+    this.scope.set(parsed.scope);
+    if (parsed.authorities !== null) this.authorities.set(parsed.authorities);
+    if (parsed.roles !== null) this.roles.set(parsed.roles);
+    if (parsed.permissions !== null) this.permissions.set(parsed.permissions);
   }
 }

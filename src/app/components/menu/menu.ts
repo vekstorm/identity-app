@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { APP_CONFIG } from '../../core/app-config.token';
 import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '../../core/pkce';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-menu',
@@ -11,6 +12,7 @@ import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '
 })
 export class Menu {
   private config = inject(APP_CONFIG);
+  authService = inject(AuthService);
 
   async login(): Promise<void> {
     const codeVerifier = generateCodeVerifier();
@@ -29,6 +31,12 @@ export class Menu {
   }
 
   logout(): void {
-    window.location.href = this.config.apiUrl + "/login?logout";
+    this.authService.logout();
+    const authBaseUrl = this.config.authorizeUri?.replace(/\/oauth2\/authorize.*$/, '');
+    if (authBaseUrl) {
+      window.location.href = `${authBaseUrl}/exit`;
+    } else {
+      window.location.href = '/';
+    }
   }
 }

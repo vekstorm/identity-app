@@ -4,6 +4,7 @@ export interface AppEnvironment {
   apiUrl: string;
   authorizeUri?: string;
   clientId?: string;
+  clientSecret?: string;
   redirectUri?: string;
   scope?: string;
   responseType?: string;
