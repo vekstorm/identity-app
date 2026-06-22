@@ -6,10 +6,6 @@ export const routes: Routes = [
     loadComponent: () => import("./components/home/home").then((m) => m.Home)
   },
   {
-    path: 'authorized',
-    loadComponent: () => import("./components/authorized/authorized").then((m) => m.Authorized)
-  },
-  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full'

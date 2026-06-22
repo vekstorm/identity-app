@@ -7,7 +7,7 @@ export const environment: AppEnvironment = {
   tokenUri: 'http://localhost:9000/oauth2/token',
   clientId: 'identity-client',
   clientSecret: 'identity-secret',
-  redirectUri: 'http://localhost:4200/authorized',
+  redirectUri: 'http://localhost:4200/',
   scope: 'openid profile offline_access',
   responseType: 'code',
   responseMode: 'form_post',

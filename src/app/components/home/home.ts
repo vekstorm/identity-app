@@ -1,16 +1,20 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { APP_CONFIG } from '../../core/app-config.token';
 import { generateCodeVerifier, generateCodeChallenge, storeCodeVerifier } from '../../core/pkce';
+import { Users } from '../users/users';
+import { Roles } from '../roles/roles';
+import { Permissions } from '../permissions/permissions';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [Users, Roles, Permissions],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
 export class Home {
   private config = inject(APP_CONFIG);
+  authService = inject(AuthService);
 
   authorizeUri = this.config.authorizeUri?.replace('?', '');
   redirectUri = this.config.redirectUri;

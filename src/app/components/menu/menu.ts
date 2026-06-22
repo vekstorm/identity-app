@@ -32,11 +32,6 @@ export class Menu {
 
   logout(): void {
     this.authService.logout();
-    const authBaseUrl = this.config.authorizeUri?.replace(/\/oauth2\/authorize.*$/, '');
-    if (authBaseUrl) {
-      window.location.href = `${authBaseUrl}/exit?client_id=${this.config.clientId}`;
-    } else {
-      window.location.href = '/';
-    }
+    window.location.href = '/';
   }
 }
