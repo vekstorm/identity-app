@@ -1,7 +1,10 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { APP_CONFIG } from '../core/app-config.token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+
+  private config = inject(APP_CONFIG);
 
   private _isAuthenticated = signal<boolean>(false);
   private _hasAuthority = signal<boolean>(false);
@@ -60,9 +63,20 @@ export class AuthService {
   logout() {
     this._isAuthenticated.update(() => false);
     this._hasAuthority.update(() => false);
-    window.location.href = '/'
     localStorage.clear();
     sessionStorage.clear();
+    document.cookie.split(';').forEach((c) => {
+      document.cookie = c.replace(/^ +/, '').replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+    });
+
+    const authBaseUrl = this.config.authorizeUri?.replace(/\/oauth2\/authorize.*$/, '');
+    if (authBaseUrl) {
+      fetch(`${authBaseUrl}/exit?client_id=${this.config.clientId}`, {
+        method: 'GET',
+        credentials: 'include',
+        mode: 'cors',
+      }).catch(() => {});
+    }
   }
 
   parseClaims(claims: Record<string, unknown>) {

@@ -1,0 +1,265 @@
+:host {
+  display: block;
+}
+
+.users-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.users-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 0 12px;
+  flex: 1;
+  max-width: 320px;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-color: #444;
+  }
+}
+
+.search-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+  padding: 10px 8px;
+  width: 100%;
+  font-family: inherit;
+  &::placeholder {
+    color: #555;
+  }
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+  &:hover {
+    color: #fff;
+  }
+}
+
+.btn-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #fff;
+  color: #000;
+  border: 1px solid #fff;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: inherit;
+  white-space: nowrap;
+  &:hover {
+    background: #e6e6e6;
+    border-color: #e6e6e6;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #1a1a1a;
+  border-radius: 10px;
+  background: #000;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  thead {
+    background: #0a0a0a;
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      color: #666;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #0d0d0d;
+    transition: background 0.2s;
+    &:hover {
+      background: #0d0d0d;
+    }
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  td {
+    padding: 12px 16px;
+    color: #ccc;
+    vertical-align: middle;
+  }
+}
+
+.cell-username {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.user-avatar-sm {
+  width: 30px;
+  height: 30px;
+  background: #fff;
+  color: #000;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.role-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #0a0a0a;
+  border: 1px solid #222;
+  border-radius: 5px;
+  font-size: 11px;
+  color: #aaa;
+  margin-right: 4px;
+  margin-bottom: 2px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  &.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid #333;
+  }
+
+  &.inactive {
+    background: rgba(255, 80, 80, 0.08);
+    color: #ff6666;
+    border: 1px solid rgba(255, 80, 80, 0.2);
+  }
+}
+
+.cell-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-action {
+  background: none;
+  border: 1px solid #1a1a1a;
+  border-radius: 6px;
+  color: #666;
+  cursor: pointer;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #fff;
+    color: #fff;
+    background: #0d0d0d;
+  }
+
+  &.danger:hover {
+    border-color: #ff4444;
+    color: #ff4444;
+  }
+
+  &.danger svg {
+    stroke: #ff4444;
+  }
+}
+
+.loading-cell {
+  text-align: center;
+  padding: 40px 16px !important;
+  color: #555;
+  font-size: 13px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.page-btn {
+  background: none;
+  border: 1px solid #1a1a1a;
+  border-radius: 6px;
+  color: #666;
+  cursor: pointer;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    border-color: #fff;
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.page-info {
+  font-size: 12px;
+  color: #555;
+  padding: 0 8px;
+}
+
+@media (max-width: 768px) {
+  .users-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-box {
+    max-width: 100%;
+  }
+}
